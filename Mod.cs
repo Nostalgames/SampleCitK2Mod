@@ -8,6 +8,7 @@ using Backend.Gamedesign.EventSystem;
 using Backend.Gamedesign.EventSystem.Events;
 using Backend.Gamedesign.EventSystem.DataStructures;
 using Backend.Gamedesign;
+using Backend.Gamedesign.Utils.UnitsOfWork;
 
 namespace SecondMod
 {
@@ -53,10 +54,8 @@ namespace SecondMod
             return !IfThisEventWasEverDone(gameState);
         }
 
-        public override void StartEvent(GameState gameState, EventDrawInfo eventDrawInfo)
+        public override UnitOfWork[] StartEvent(GameState gameState, EventDrawInfo eventDrawInfo)
         {
-
-
             eventDrawInfo.eventTitle = "Custom event";
             eventDrawInfo.eventDesc = @"It's a custom event included in this game by mod. It's a first event modding of this game in the world.";
             eventDrawInfo.image = 0;
@@ -69,7 +68,12 @@ namespace SecondMod
             eventDrawInfo.optionsNamesAlt = new string[1];
             eventDrawInfo.optionsNamesAlt[0] = "Hovering...";
 
+            eventDrawInfo.optionsConditions = new string[1] { string.Empty };
+
             eventDrawInfo.optionsEnabled = new bool[1] { true };
+
+            // Unit of work with the index of the option that was chosen will be executed before call to FinishEvent
+            return new UnitOfWork[1] { new UnitOfWork() };
 
         }
 
@@ -92,13 +96,14 @@ namespace SecondMod
     {
         /// <summary>
         /// A postfix to Backend.OtherUtils.ReflectionUtils.GetTypesByAttributes.
-        /// GetTypesByAttributes is used to obtain all events' classes (and not just them), so we can change it, so it will return our custom events as well.
-        /// GetTypesByAttributes works by findind all the classes that are decorated with an attribute T
-        /// We will just add postfix to this method, which concatenates our events' types to existing IEnumerable<System.Type>
         /// </summary>
-
         static void Postfix(ref IEnumerable<System.Type> __result, System.Type T)
         {
+            /// GetTypesByAttributes is used to obtain all events' classes (and not just them), so we can change it, so it will return our custom events as well.
+            /// GetTypesByAttributes works by findind all the classes that are decorated with an attribute T
+            /// We will just add postfix to this method, which concatenates our events' types to existing IEnumerable<System.Type>
+
+
             // We should check the argument T 
             // GetTypesByAttributes is used to handle events, diplomacy buttons, conspiracies, technology trees...
             // Our postfix should work only for events and every event class is decorated with EventAttribute
